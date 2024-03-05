@@ -1,0 +1,147 @@
+Program.Sub.ScreenSU.Start
+gui.fPSel..create
+gui.fPSel..caption("Select Part Type")
+gui.fPSel..size(3150,1995)
+gui.fPSel..position(0,0)
+gui.fPSel..event(unload,Unload)
+gui.fPSel..alwaysontop(False)
+gui.fPSel..fontname("Arial")
+gui.fPSel..fontsize(8)
+gui.fPSel..forecolor(0)
+gui.fPSel..fontstyle(,,,,)
+gui.fPSel..BackColor(-2147483633)
+gui.fPSel..controlbox(True)
+gui.fPSel..maxbutton(False)
+gui.fPSel..minbutton(True)
+gui.fPSel..mousepointer(0)
+gui.fPSel..moveable(True)
+gui.fPSel..sizeable(False)
+gui.fPSel..ShowInTaskBar(True)
+gui.fPSel..titlebar(True)
+gui.fPSel.lblPart.create(label,"Type",True,510,255,1,110,110,True,0,Arial,8,-2147483633,0)
+gui.fPSel.ddlType.create(dropdownlist)
+gui.fPSel.ddlType.visible(True)
+gui.fPSel.ddlType.size(2760,330)
+gui.fPSel.ddlType.zorder(0)
+gui.fPSel.ddlType.position(85,310)
+gui.fPSel.ddlType.enabled(True)
+gui.fPSel.ddlType.fontname("Arial")
+gui.fPSel.ddlType.fontsize(8)
+gui.fPSel.cmdOk.create(button)
+gui.fPSel.cmdOk.caption("Ok")
+gui.fPSel.cmdOk.visible(True)
+gui.fPSel.cmdOk.size(855,375)
+gui.fPSel.cmdOk.zorder(0)
+gui.fPSel.cmdOk.position(100,990)
+gui.fPSel.cmdOk.enabled(True)
+gui.fPSel.cmdOk.fontname("Arial")
+gui.fPSel.cmdOk.fontsize(8)
+gui.fPSel.cmdOk.event(click,cmdok_click)
+gui.fPSel.ddlType.tabstop(True)
+gui.fPSel.ddlType.tabindex(1)
+gui.fPSel.cmdOk.tabstop(True)
+gui.fPSel.cmdOk.tabindex(2)
+
+
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+'Coded by: MLA
+'Project Start Date: 1/25/2011
+'Hooks:
+'  14510
+'Notes:
+'  C&B Piping
+
+F.Intrinsic.Control.CallSub(Ddlload)
+Gui.fPSel..Show
+
+Program.Sub.Main.End
+
+Program.Sub.DDLLoad.Start
+V.Local.sError.Declare(String)
+
+F.Intrinsic.Control.SetErrorHandler("DDLLoad_Err")
+F.Intrinsic.Control.ClearErrors
+
+Gui.fPSel.ddlType.AddItem("Fittings",0)
+Gui.fPSel.ddlType.AddItem("Fabricated Pipe",1)
+Gui.fPSel.ddlType.AddItem("Pipe",2)
+Gui.fPSel.ddlType.AddItem("Accessories",3)
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("DDLLoad_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+Function.Intrinsic.Control.EndIf
+
+Program.Sub.DDLLoad.End
+
+program.sub.cmdok_click.start
+V.Local.sError.Declare(String)
+V.Local.sPGOPT.Declare(String)
+V.Local.sPRTGN.Declare(String)
+V.Local.sReadPGOPT.Declare(String)
+V.Local.sReadPRTGN.Declare(String)
+V.Local.sWritePGOPT.Declare(String)
+V.Local.sWritePRTGN.Declare(String)
+
+F.Intrinsic.Control.SetErrorHandler("cmdOk_Err")
+F.Intrinsic.Control.ClearErrors
+
+F.Intrinsic.String.Concat("PGOPT",V.Caller.CompanyCode,V.Local.sPGOPT)
+F.Intrinsic.String.Concat("PRTGN",V.Caller.CompanyCode,V.Local.sPRTGN)
+F.Intrinsic.String.Concat(V.Caller.FilesDir,"\",V.Local.sPGOPT,V.Local.sWritePGOPT)
+F.Intrinsic.String.Concat(V.Caller.FilesDir,"\",V.Local.sPRTGN,V.Local.sWritePRTGN)
+F.Intrinsic.String.Concat(V.Caller.FilesDir,"\PartGen\",V.Local.sPGOPT,V.Local.sReadPGOPT)
+F.Intrinsic.String.Concat(V.Caller.FilesDir,"\PartGen\",V.Local.sPRTGN,V.Local.sReadPRTGN)
+F.Intrinsic.Control.SelectCase(V.Screen.fPSel!ddlType.Text)
+	F.Intrinsic.Control.Case("")
+		F.Intrinsic.UI.Msgbox("Please select a type!","Error")
+	F.Intrinsic.Control.Case("Fittings")
+		F.Intrinsic.String.Concat(V.Local.sReadPGOPT,".FIT",V.Local.sReadPGOPT)
+		F.Intrinsic.String.Concat(V.Local.sReadPRTGN,".FIT",V.Local.sReadPRTGN)
+		F.Intrinsic.File.CopyFile(V.Local.sReadPRTGN,V.Local.sWritePRTGN)
+		F.Intrinsic.File.CopyFile(V.Local.sReadPGOPT,V.Local.sWritePGOPT)
+		F.Intrinsic.Control.CallSub(Unload)
+	F.Intrinsic.Control.Case("Fabricated Pipe")
+		F.Intrinsic.String.Concat(V.Local.sReadPGOPT,".FAB",V.Local.sReadPGOPT)
+		F.Intrinsic.String.Concat(V.Local.sReadPRTGN,".FAB",V.Local.sReadPRTGN)
+		F.Intrinsic.File.CopyFile(V.Local.sReadPRTGN,V.Local.sWritePRTGN)
+		F.Intrinsic.File.CopyFile(V.Local.sReadPGOPT,V.Local.sWritePGOPT)
+		F.Intrinsic.Control.CallSub(Unload)
+	F.Intrinsic.Control.Case("Pipe")
+		F.Intrinsic.String.Concat(V.Local.sReadPGOPT,".PIP",V.Local.sReadPGOPT)
+		F.Intrinsic.String.Concat(V.Local.sReadPRTGN,".PIP",V.Local.sReadPRTGN)
+		F.Intrinsic.File.CopyFile(V.Local.sReadPRTGN,V.Local.sWritePRTGN)
+		F.Intrinsic.File.CopyFile(V.Local.sReadPGOPT,V.Local.sWritePGOPT)
+		F.Intrinsic.Control.CallSub(Unload)
+	F.Intrinsic.Control.Case("Accessories")
+		F.Intrinsic.String.Concat(V.Local.sReadPGOPT,".ACC",V.Local.sReadPGOPT)
+		F.Intrinsic.String.Concat(V.Local.sReadPRTGN,".ACC",V.Local.sReadPRTGN)
+		F.Intrinsic.File.CopyFile(V.Local.sReadPRTGN,V.Local.sWritePRTGN)
+		F.Intrinsic.File.CopyFile(V.Local.sReadPGOPT,V.Local.sWritePGOPT)
+		F.Intrinsic.Control.CallSub(Unload)
+F.Intrinsic.Control.EndSelect
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("cmdOk_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+Function.Intrinsic.Control.EndIf
+
+
+program.sub.cmdok_click.end
+
+Program.Sub.Unload.Start
+F.Intrinsic.Control.End
+
+Program.Sub.Unload.End
+
+
